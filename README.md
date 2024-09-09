@@ -1,66 +1,104 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Laravel Authentication Backend with Role Management
+This project implements a Laravel backend with authentication and role management using the Spatie package.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Getting Started
+1. Clone the Repository
+Clone the repository and install the composer dependencies:
 
-## About Laravel
+bash
+Copy code
+git clone <repository-url>
+cd <project-directory>
+composer install
+2. Spatie Role Management Setup
+The project uses Spatie Laravel Permissions for role and permission management.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Spatie Files Installation
+Install the Spatie package:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+bash
+Copy code
+composer require spatie/laravel-permission
+Publish the necessary files:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+bash
+Copy code
+php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+Clear cached configurations:
 
-## Learning Laravel
+bash
+Copy code
+php artisan optimize:clear
+# or
+php artisan config:clear
+Add the necessary trait to your User model:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+php
+Copy code
+use Spatie\Permission\Traits\HasRoles;
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+class User extends Authenticatable {
+    use HasRoles;
+}
+3. Database Configuration
+Open the .env file and configure the database connection:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+bash
+Copy code
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database_name
+DB_USERNAME=your_database_username
+DB_PASSWORD=your_database_password
+You can either import the provided laravelproject.sql file into your MySQL database or use the Laravel migrations:
 
-## Laravel Sponsors
+Option 1: Import the SQL file
+Use any MySQL visualizer (e.g., MySQL Workbench) to import the provided laravelproject.sql.
+Ensure the database schema name matches the .env file.
+Option 2: Run Migrations
+Run the migrations to set up the database:
+bash
+Copy code
+php artisan migrate
+4. Seeding the Database
+There are three seeders provided to populate the database: PermissionsTableSeeder, RoleTableSeeder, and UserTableSeeder.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Before running the seeders, ensure that the default authentication guard is set to api:
 
-### Premium Partners
+In config/auth.php, change the default guard to api:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+php
+Copy code
+'defaults' => [
+    'guard' => env('AUTH_GUARD', 'api'),
+    'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
+],
+Run the seeders to populate roles, permissions, and users:
 
-## Contributing
+bash
+Copy code
+php artisan db:seed
+Once seeding is complete, revert the guard back to web in config/auth.php:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+php
+Copy code
+'defaults' => [
+    'guard' => env('AUTH_GUARD', 'web'),
+    'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
+],
+5. Running the Application
+Start the Laravel development server:
 
-## Code of Conduct
+bash
+Copy code
+php artisan serve
+6. Frontend Integration
+Check the frontend part of the project and get the login credentials from the UserTableSeeder. You can use the seeded users' email and password to log in.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Notes
+Ensure that the api guard is used for roles and permissions in the PermissionsTableSeeder and RoleTableSeeder.
+After seeding, remember to switch the guard back to web to handle web-based authentication.
+Troubleshooting
+If you encounter any issues with the database schema, double-check your .env configurations and ensure the correct schema name is provided.
+If permission issues arise, verify that the roles and permissions were seeded correctly using the api guard.
